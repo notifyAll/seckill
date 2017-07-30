@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 目的为dao接口方法提供sql语句配置 -->
+<!-- 配置对应那个dao接口namespace="org.seckill.dao.SeckillDao" -->
+<mapper namespace="org.seckill.dao.SeckillDao">
+    <!--id 就是对应的方法名-->
+    <update id="reduceNumber">
+        UPDATE
+            seckill
+        SET
+            number=number-1
+        WHERE
+            seckill_id=#{seckillId}
+        AND
+            start_time <![CDATA[ <= ]]> #{killTime}
+        AND
+            end_time>=#{killTime}
+        AND
+            number>0
+    </update>
+    <!--一定要注意 不是$  是#  是# 是#
+    org.apache.ibatis.reflection.ReflectionException: There is no getter for property named 'seckillId' in 'class java.lang.Long'
+    -->
+    <select id="querryById" resultType="org.seckill.entity.Seckill" parameterType="long">
+        SELECT  seckill_id,name,number,start_time,end_time,create_time
+        FROM seckill
+        WHERE seckill.seckill_id=#{seckillId}
+    </select>
+    <!--
+    org.apache.ibatis.binding.BindingException: Parameter 'offset' not found. Available parameters are [0, 1, param1, param2]
+    参数什么的找不到问题 所以要在 dao接口中声明 @Param("offset")
+        List<Seckill> queryAll(@Param("offset") int offset,@Param("limit") int limit);
+        应为java运行时没有保存形参  List<Seckill> queryAll(int offset,int limit); ==  List<Seckill> queryAll(arg0,arg1);
+    -->
+    <select id="queryAll" resultType="Seckill">
+        SELECT seckill_id,name,number,start_time,end_time,create_time
+        FROM seckill
+        ORDER BY  create_time DESC
+        LIMIT #{offset},#{limit}
+    </select>
+</mapper>
